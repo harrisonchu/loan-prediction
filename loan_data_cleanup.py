@@ -126,6 +126,10 @@ for line in readerIterable:
 	if isMissingData(line):
 		continue
 
+	#if loan_status is CURRENT then the loan hasn't been completed.  Might be able to do something with this data later but for now discard these 
+	if line[columnNames["loan_status"]] == "Current":
+		continue
+
 	#not sure if this is "bad" data. seems like the loan_status is just overloaded with prefix.  Remove here but consider removing all data like this
 	if "Does not meet the credit policy.  Status:" in line[columnNames["loan_status"]] :
 		line[columnNames["loan_status"]] = line[columnNames["loan_status"]][len("Does not meet the credit policy.  Status:"):]
