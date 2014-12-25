@@ -4,18 +4,19 @@ from csv import writer
 import datetime
 
 monthDict ={
-	"Jan":"01",
-	"Feb":"02",
-	"Mar":"03",
-	"Apr":"04",
-	"May":"05",
-	"Jun":"06",
-	"Jul":"07",
-	"Aug":"08",
-	"Sep":"09",
-	"Oct":"10",
-	"Nov":"11",
-	"Dec":"12"}
+"Jan":"01",
+"Feb":"02",
+"Mar":"03",
+"Apr":"04",
+"May":"05",
+"Jun":"06",
+"Jul":"07",
+"Aug":"08",
+"Sep":"09",
+"Oct":"10",
+"Nov":"11",
+"Dec":"12"
+}
 
 columnNames = {
 'id':0,
@@ -81,9 +82,6 @@ NotNullableFeaturesList=[
 "total_acc"
 ]
 
-removeColumnsList=[
-]
-
 def getCreditHistoryAgeMonths(start, end):
 	#if beginning if credit history doesn't exist then age is 0
 	if len(start) == 0:
@@ -103,6 +101,7 @@ def isMissingData(line):
 			return True
 	return False
 
+#change the filename here to point to whereever your own data file is located"
 f = open("./special_chars_removed_loan_stats.csv")
 data = []
 readerIterable = reader(f)
@@ -111,56 +110,58 @@ readerIterable = reader(f)
 header = next(readerIterable, None)
 header.append("credit_history_age_months")
 
-#Remove the column loan_status because we will put that in a separate target file
+#Remove loan_status from header because we will put that in a separate target file
 header.pop(columnNames['loan_status'])
 
 for line in readerIterable:
-	if len(line) == 52:
+	#Anything less than 52 entries is malformed and we don't want to include them in our data set
+	if len(line) != 52:
+		continue
 
-		#Don't include headers.  The file is cated over multiple files so there are multiple headers in the middle
-		if line[0] == "id":
-			continue
+	#Don't include headers.  The file is cated over multiple files so there are multiple headers in the middle
+	if line[0] == "id":
+		continue
 
-		#check data has all necessary fields
-		if isMissingData(line):
-			continue
+	#check data has all necessary fields
+	if isMissingData(line):
+		continue
 
-		#not sure if this is "bad" data. seems like the loan_status is just overloaded with prefix.  Remove here but consider removing all data like this
-		if "Does not meet the credit policy.  Status:" in line[columnNames["loan_status"]] :
-			line[columnNames["loan_status"]] = line[columnNames["loan_status"]][len("Does not meet the credit policy.  Status:"):]
+	#not sure if this is "bad" data. seems like the loan_status is just overloaded with prefix.  Remove here but consider removing all data like this
+	if "Does not meet the credit policy.  Status:" in line[columnNames["loan_status"]] :
+		line[columnNames["loan_status"]] = line[columnNames["loan_status"]][len("Does not meet the credit policy.  Status:"):]
 
-		#convert interest rate percentages to 0 to 1 scale
-	        line[columnNames["int_rate"]] = float(line[columnNames["int_rate"]].strip("%")) / 100
-		#convert revolving credit utilization to 0 to 1 scale.  if non exists assume it is 100% utilization (typically the revolving balance is 0)
-		if len(line[columnNames["revol_util"]]) == 0:
-			line[columnNames["revol_util"]] = 1
-		else:
-			line[columnNames["revol_util"]] = float(line[columnNames["revol_util"]].strip("%")) / 100
-	
-		#Don't know what to do with missing data for this yet so just making it a binary thing.
-		if len(line[columnNames["mths_since_last_delinq"]]) == 0:
-			line[columnNames["mths_since_last_delinq"]] = 0 
-		else:
-			line[columnNames["mths_since_last_delinq"]] = 1
+	#convert interest rate percentages to 0 to 1 scale
+        line[columnNames["int_rate"]] = float(line[columnNames["int_rate"]].strip("%")) / 100
+	#convert revolving credit utilization to 0 to 1 scale.  if non exists assume it is 100% utilization (typically the revolving balance is 0)
+	if len(line[columnNames["revol_util"]]) == 0:
+		line[columnNames["revol_util"]] = 1
+	else:
+		line[columnNames["revol_util"]] = float(line[columnNames["revol_util"]].strip("%")) / 100
 
-		if len(line[columnNames["mths_since_last_record"]]) == 0:
-			line[columnNames["mths_since_last_record"]] = 0
-		else:
-			line[columnNames["mths_since_last_record"]] = 1
+	#Don't know what to do with missing data for this yet so just making it a binary thing.
+	if len(line[columnNames["mths_since_last_delinq"]]) == 0:
+		line[columnNames["mths_since_last_delinq"]] = 0 
+	else:
+		line[columnNames["mths_since_last_delinq"]] = 1
 
-		if len(line[columnNames["mths_since_last_major_derog"]]) == 0:
-			line[columnNames["mths_since_last_major_derog"]] = 0
-		else:
-			line[columnNames["mths_since_last_major_derog"]] = 1
+	if len(line[columnNames["mths_since_last_record"]]) == 0:
+		line[columnNames["mths_since_last_record"]] = 0
+	else:
+		line[columnNames["mths_since_last_record"]] = 1
 
-		if len(line[columnNames["inq_last_6mths"]]) == 0:
-			line[columnNames["inq_last_6mths"]] = 0
-		else:
-			line[columnNames["inq_last_6mths"]] = 1
+	if len(line[columnNames["mths_since_last_major_derog"]]) == 0:
+		line[columnNames["mths_since_last_major_derog"]] = 0
+	else:
+		line[columnNames["mths_since_last_major_derog"]] = 1
 
-		#Add this new field to the list of features.
-		line.append(getCreditHistoryAgeMonths(line[columnNames["earliest_cr_line"]], line[columnNames["issue_d"]]))
-		data.append(line)
+	if len(line[columnNames["inq_last_6mths"]]) == 0:
+		line[columnNames["inq_last_6mths"]] = 0
+	else:
+		line[columnNames["inq_last_6mths"]] = 1
+
+	#Add this new field to the list of features.
+	line.append(getCreditHistoryAgeMonths(line[columnNames["earliest_cr_line"]], line[columnNames["issue_d"]]))
+	data.append(line)
 
 #CSV for training data 
 training = writer(open("./clean_loan_training.csv","wb"))
