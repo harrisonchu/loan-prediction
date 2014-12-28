@@ -1,4 +1,4 @@
-mport pandas as pd
+import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.cross_validation import train_test_split
 import csv
@@ -66,6 +66,20 @@ n_est = 400
 clf = RandomForestClassifier(n_est, n_jobs=7)
 clf.fit(training_data, training_target)
 
+#If the probability of default is greater than 40%, then predict it will default.  The reason for this is because
+#we're not as averse to lost opportunity costs (we predict it will default but it doesn't).  Instead, we're more averse
+#to cases where we think the loan won't default but it does (false positive).  Thus, we do this to bias the model to 
+#towards not producing false positives at the expensive of producing false negatives
+def safePredict(data):
+    resultArray=[]
+    probabilities = clf.predict_proba(data)
+    for probability in probabilities:
+        if probability[0] > 0.40:
+            resultArray.append(0)
+        else:
+            resultArray.append(1)
+    return np.array(resultArray)
+
 def percentage_false_positive(x, y):
     positive_predictions = 0.0
     false_positive_predictions = 0.0
@@ -88,7 +102,8 @@ def percentage_false_negative(x, y):
                 
     return false_negative_predictions / negative_predictions
 
-predicted = clf.predict(test_data)
+#predict the test data
+predicted = safePredict(test_data)
 
 print(percentage_false_positive(predicted, test_target))
 print(percentage_false_negative(predicted, test_target))
