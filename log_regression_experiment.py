@@ -18,6 +18,18 @@ del df['title']
 del df['last_pymnt_d']
 del df['next_pymnt_d']
 del df['last_credit_pull_d']
+#below are removed because they are not available in the lending club api
+del df['pymnt_plan']
+del df['out_prncp']
+del df['out_prncp_inv']
+del df['total_pymnt']
+del df['total_pymnt_inv']
+del df['total_rec_prncp']
+del df['total_rec_int']
+del df['total_rec_late_fee']
+del df['recoveries']
+del df['collection_recovery_fee']
+
 loan_training_data = df.T.to_dict().values()
 
 #load target data.  For now we naievely categorize anything late as a default
