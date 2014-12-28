@@ -45,7 +45,7 @@ def unzip_reports(reports):
     for report in reports:
         subprocess.call(['unzip', report])
         rm_file(report)
-        # remove the ".gz"
+        # remove the ".zip"
         new_report = report[:-4]
         new_reports.append(new_report)
 
