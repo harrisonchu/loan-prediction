@@ -2,6 +2,32 @@ import sys
 from csv import reader
 from csv import writer
 import datetime
+import re
+import enchant
+
+#Path to raw data file
+filepath = "./special_chars_removed_loan_stats.csv"
+
+#initialize english dictionary and make some exceptions
+englishDictionary = enchant.Dict("en_US")
+englishDictionary.add_to_pwl("LendingClub")
+englishDictionary.add_to_pwl("rsquo")
+englishDictionary.add_to_pwl("Citi")
+englishDictionary.add_to_pwl("alot")
+englishDictionary.add_to_pwl("pre")
+englishDictionary.add_to_pwl("FICO")
+englishDictionary.add_to_pwl("healthcare")
+englishDictionary.add_to_pwl("lendingclub")
+englishDictionary.add_to_pwl("AMEX")
+englishDictionary.add_to_pwl("nbsp")
+englishDictionary.add_to_pwl("downpayment")
+englishDictionary.add_to_pwl("startup")
+englishDictionary.add_to_pwl("DTI")
+englishDictionary.add_to_pwl("HVAC")
+englishDictionary.add_to_pwl("W2")
+englishDictionary.add_to_pwl("amex")
+englishDictionary.add_to_pwl("mastercard")
+englishDictionary.add_to_pwl("CitiBank")
 
 monthDict ={
 "Jan":"01",
@@ -101,14 +127,40 @@ def isMissingData(line):
 			return True
 	return False
 
+def getPercentageMisspelledWords(sentence):
+	totalWordCount = 0.0
+	misspelledCount = 0.0
+	words = re.findall(r"[\w']+", sentence)
+	for word in words:
+		totalWordCount += 1
+		#stupid HTML
+		if word == "br":
+			continue
+		if word.isdigit():
+			continue
+		#people represent quantities of money with [0-9]k
+		if len(word) >= 2 and word[-1].lower() == "k" and word[-2].isdigit():
+			continue
+		#allow names
+		if word.istitle():
+			continue
+		elif not englishDictionary.check(word) :
+			misspelledCount +=1
+	if totalWordCount == 0:
+		#if no description is included just return the empirical mean
+		return 0.006
+	return misspelledCount / totalWordCount	
+
 #change the filename here to point to whereever your own data file is located"
-f = open("./special_chars_removed_loan_stats.csv")
+f = open(filepath)
 data = []
 readerIterable = reader(f)
 
 #get the header and add an additional column which we're appending to the data set
 header = next(readerIterable, None)
 header.append("credit_history_age_months")
+header.append("percentage_misspelled_words_in_desc")
+
 
 #Remove loan_status from header because we will put that in a separate target file
 header.pop(columnNames['loan_status'])
@@ -163,8 +215,9 @@ for line in readerIterable:
 	else:
 		line[columnNames["inq_last_6mths"]] = 1
 
-	#Add this new field to the list of features.
+	#Add derived features to data.
 	line.append(getCreditHistoryAgeMonths(line[columnNames["earliest_cr_line"]], line[columnNames["issue_d"]]))
+	line.append(getPercentageMisspelledWords(line[columnNames["desc"]]))
 	data.append(line)
 
 #CSV for training data 
