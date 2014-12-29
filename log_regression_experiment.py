@@ -6,6 +6,8 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import zero_one_loss
 
+from tf_idf import tf_idf
+
 #load raw training data from csv
 df = pd.read_csv("./clean_loan_training.csv",low_memory=False)
 del df['id']
@@ -13,12 +15,10 @@ del df['member_id']
 del df['emp_title']
 del df['issue_d']
 del df['url']
-del df['desc']
 del df['title']
 del df['last_pymnt_d']
 del df['next_pymnt_d']
 del df['last_credit_pull_d']
-#below are removed because they are not available in the lending club api
 del df['pymnt_plan']
 del df['out_prncp']
 del df['out_prncp_inv']
@@ -30,7 +30,13 @@ del df['total_rec_late_fee']
 del df['recoveries']
 del df['collection_recovery_fee']
 
+#tfidf = tf_idf(df['desc'])
+del df['desc']
+
 loan_training_data = df.T.to_dict().values()
+
+# this probably wont work, but append tfidf matrix onto existing feature matrix
+#loan_traning_data += tfidf
 
 #load target data.  For now we naievely categorize anything late as a default
 target = list(csv.reader(open('./clean_loan_target.csv', 'rU')))

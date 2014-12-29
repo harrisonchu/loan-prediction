@@ -5,8 +5,7 @@ import datetime
 import re
 import enchant
 
-#Path to raw data file
-filepath = "./special_chars_removed_loan_stats.csv"
+
 
 #initialize english dictionary and make some exceptions
 englishDictionary = enchant.Dict("en_US")
@@ -152,6 +151,10 @@ def getPercentageMisspelledWords(sentence):
 	return misspelledCount / totalWordCount	
 
 #change the filename here to point to whereever your own data file is located"
+#Path to raw data file
+if len(sys.argv) < 2:
+    sys.exit("Supply path to CSV file.")
+filepath = sys.argv[1]
 f = open(filepath)
 data = []
 readerIterable = reader(f)
