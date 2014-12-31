@@ -4,6 +4,7 @@ from csv import writer
 import datetime
 import re
 import enchant
+import get_data
 
 #Path to raw data file
 filepath = "./special_chars_removed_loan_stats.csv"
@@ -151,6 +152,9 @@ def getPercentageMisspelledWords(sentence):
 		return 0.006
 	return misspelledCount / totalWordCount	
 
+#Download data from the internet
+filepath = get_data.fetchDataAndReturnFilePath()
+
 #change the filename here to point to whereever your own data file is located"
 f = open(filepath)
 data = []
@@ -158,6 +162,11 @@ readerIterable = reader(f)
 
 #get the header and add an additional column which we're appending to the data set
 header = next(readerIterable, None)
+
+#Skip line if it's some sentence that is not a header
+if len(header) != 52:
+	header = next(readerIterable, None)
+
 header.append("credit_history_age_months")
 header.append("percentage_misspelled_words_in_desc")
 

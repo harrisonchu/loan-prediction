@@ -61,10 +61,11 @@ def cat_to_single_file(reports):
         rm_file(report)
 
 
-def main():
+def fetchDataAndReturnFilePath():
     reports = download_reports()
     reports = unzip_reports(reports)
     cat_to_single_file(reports)
+    return OUTPUT_FILE
 
 
 if __name__ == '__main__':
