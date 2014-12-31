@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import zero_one_loss
 
-from tf_idf import tf_idf
+import tfidf
 
 #load raw training data from csv
 df = pd.read_csv("./clean_loan_training.csv",low_memory=False)
@@ -30,13 +30,15 @@ del df['total_rec_late_fee']
 del df['recoveries']
 del df['collection_recovery_fee']
 
-#tfidf = tf_idf(df['desc'])
+tf_idf, columns = tfidf.tfidf(df['desc'])
 del df['desc']
 
-loan_training_data = df.T.to_dict().values()
+print df.shape
+print tf_idf.shape
 
-# this probably wont work, but append tfidf matrix onto existing feature matrix
-#loan_traning_data += tfidf
+print type(tf_idf)
+
+load_training_data = df.append(pd.SparseDataFrame(data=tf_idf.toarray(), columns=columns)).T.to_dict().values()
 
 #load target data.  For now we naievely categorize anything late as a default
 target = list(csv.reader(open('./clean_loan_target.csv', 'rU')))
