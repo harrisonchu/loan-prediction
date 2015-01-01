@@ -230,6 +230,11 @@ for line in readerIterable:
 	#Add derived features to data.
 	line.append(getCreditHistoryAgeMonths(line[columnNames["earliest_cr_line"]], line[columnNames["issue_d"]]))
 	line.append(getPercentageMisspelledWords(line[columnNames["desc"]]))
+
+	#finally, make sure all string fields are lower cased with white spaces trimmed.  This will make it easier to match the prod api response
+        for index in range(len(line)):
+                if (type(line[index]) is str):
+                        line[index] = line[index].strip().lower()
 	data.append(line)
 
 #CSV for training data 
