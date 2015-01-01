@@ -191,6 +191,9 @@ for line in readerIterable:
 	if line[columnNames["loan_status"]] == "Current":
 		continue
 
+	if line[columnNames["loan_status"]] == "Late (16-30 days)":
+		continue
+
 	#not sure if this is "bad" data. seems like the loan_status is just overloaded with prefix.  Remove here but consider removing all data like this
 	if "Does not meet the credit policy.  Status:" in line[columnNames["loan_status"]] :
 		line[columnNames["loan_status"]] = line[columnNames["loan_status"]][len("Does not meet the credit policy.  Status:"):]
