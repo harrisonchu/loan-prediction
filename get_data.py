@@ -16,7 +16,7 @@ OUTPUT_FILE = "special_chars_removed_loan_stats.csv"
 def get_urls():
     """ Return urls to download. """
     for val in string.ascii_lowercase[:3]:
-        yield "https://resources.lendingclub.com/LoanStats3" + val + ".csv.zip"
+        yield "https://resources.lendingclub.com/LoanStats3" + val + "_securev1.csv.zip"
 
 
 def rm_file(file_name):

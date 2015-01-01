@@ -164,7 +164,7 @@ readerIterable = reader(f)
 header = next(readerIterable, None)
 
 #Skip line if it's some sentence that is not a header
-if len(header) != 52:
+if len(header) != 56:
 	header = next(readerIterable, None)
 
 header.append("credit_history_age_months")
@@ -175,8 +175,8 @@ header.append("percentage_misspelled_words_in_desc")
 header.pop(columnNames['loan_status'])
 
 for line in readerIterable:
-	#Anything less than 52 entries is malformed and we don't want to include them in our data set
-	if len(line) != 52:
+	#Anything less than 54 entries is malformed and we don't want to include them in our data set
+	if len(line) != 56:
 		continue
 
 	#Don't include headers.  The file is cated over multiple files so there are multiple headers in the middle
